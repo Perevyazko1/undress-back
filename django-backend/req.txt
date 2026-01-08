@@ -1,0 +1,6 @@
+asgiref==3.11.0
+Django==5.2.10   # вместо 6.0.1
+djangorestframework==3.16.1
+sqlparse==0.5.5
+gunicorn==21.2.0
+psycopg[binary]==3.3.1
