@@ -17,14 +17,17 @@ def check_user(request):
         telegram_id=telegram_id
     )
 
-    if created:
-        TokenBalance.objects.create(user=user, balance=0)
+    balance, _ = TokenBalance.objects.get_or_create(
+        user=user,
+        defaults={"balance": 0}
+    )
 
     return Response({
-        'created': created,
-        'telegram_id': user.telegram_id,
-        'tokens': user.balance.balance
+        "created": created,
+        "telegram_id": user.telegram_id,
+        "tokens": balance.balance
     })
+
 
 
 @api_view(['POST'])
