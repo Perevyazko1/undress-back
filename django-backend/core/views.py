@@ -118,3 +118,24 @@ def spend_tokens(request):
     return Response({
         'tokens': balance.balance
     })
+
+@api_view(['POST'])
+def get_tokens(request):
+    serializer = CheckUserSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    telegram_id = serializer.validated_data['telegram_id']
+
+    try:
+        user = User.objects.get(telegram_id=telegram_id)
+    except User.DoesNotExist:
+        return Response(
+            {'detail': 'User not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    balance = user.balance
+
+    return Response({
+        'tokens': balance.balance
+    })
