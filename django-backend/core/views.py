@@ -139,3 +139,47 @@ def get_tokens(request):
     return Response({
         'tokens': balance.balance
     })
+
+@api_view(['POST'])
+def set_callback_data(request):
+    """
+    Устанавливает callback_data для пользователя с TTL 15 минут по умолчанию.
+    Ожидается JSON: {"telegram_id": <int>, "callback_data": <str>}
+    """
+    serializer = CheckUserSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    telegram_id = serializer.validated_data['telegram_id']
+    callback_data_value = request.data.get('callback_data')
+
+    if callback_data_value is None:
+        return Response({'detail': 'callback_data is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(telegram_id=telegram_id)
+    except User.DoesNotExist:
+        return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    user.set_callback_data(callback_data_value)
+
+    return Response({'success': True, 'callback_data': user.get_callback_data()})
+
+@api_view(['POST'])
+def get_callback_data(request):
+    """
+    Получает callback_data для пользователя.
+    Ожидается JSON: {"telegram_id": <int>}
+    """
+    serializer = CheckUserSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    telegram_id = serializer.validated_data['telegram_id']
+
+    try:
+        user = User.objects.get(telegram_id=telegram_id)
+    except User.DoesNotExist:
+        return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    data = user.get_callback_data()
+
+    return Response({'callback_data': data})
